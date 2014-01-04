@@ -2384,6 +2384,7 @@ exports['interrupt'] = function(vector) {
 
   };
 exports["set"] = function(reg,value) {
+  reg = reg.toUpperCase();
     switch (reg) {
       case "PC": proc.pc=value;return;
       case "A": proc.a=value;return;

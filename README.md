@@ -36,7 +36,7 @@ Usage
 Disassembler:
 
 - *window.CPUD8080* - main disassembler object (instantiated at the start - it shall change)
-- *CPUD8080.disasm(i,a,b)* - Disassembly instruction. You have to provide 5 bytes - first one is an instruction code, second and third are parameters.
+- *CPUD8080.disasm(i,a,b)* - Disassembly instruction. You have to provide 3 bytes - first one is an instruction code, second and third are parameters (they can be omitted when instruction is single byte or two bytes). It returns an array of two elements: the first is instruction mnemonics, the second is an instruction length.
 
 You can use 8080js also as Node.js module.
 
