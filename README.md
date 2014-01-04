@@ -33,6 +33,12 @@ Usage
 - *CPU8080.status()* - Returns a object {pc, a, b, c, d, e, h, l, f, sp} with actual state of internal registers
 - *CPU8080.steps(N)* - Execute instructions as real CPU, which takes "no less than N" clock ticks.
 
+Disassembler:
+
+- *window.CPUD8080* - main disassembler object (instantiated at the start - it shall change)
+- *CPUD8080.disasm(i,a,b)* - Disassembly instruction. You have to provide 5 bytes - first one is an instruction code, second and third are parameters.
+
+You can use 8080js also as Node.js module.
 
 Tests
 -----
