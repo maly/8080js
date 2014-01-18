@@ -196,28 +196,28 @@ Cpu.prototype.step = function() {
 };
 
 Cpu.prototype.writePort = function (port, v) {
-  if (portOut) portOut(port,v);
+  if (portOut) portOut(port & 0xff,v);
 };
 
 Cpu.prototype.readPort = function (port) {
-  if (portIn) return portIn(port);
+  if (portIn) return portIn(port & 0xff);
   return 255;
 };
 
 Cpu.prototype.getByte = function (addr) {
-  return byteAt(addr);
+  return byteAt(addr & 0xffff);
 };
 
 Cpu.prototype.getWord = function (addr) {
   //var ram = this.ram;
-  var l = byteAt(addr);
-  var h = byteAt(addr+1);
+  var l = byteAt(addr & 0xffff);
+  var h = byteAt((addr+1)  & 0xffff);
   return h << 8 | l;
 };
 
 Cpu.prototype.nextByte = function() {
   var pc = this.pc;
-  var b = byteAt(pc);
+  var b = byteAt(pc & 0xffff);
   this.pc = (pc + 1) & 0xFFFF;
   return b;
 };
@@ -225,8 +225,8 @@ Cpu.prototype.nextByte = function() {
 Cpu.prototype.nextWord = function() {
   var pc = this.pc;
   //var ram = this.ram;
-  var l = byteAt(pc);
-  var h = byteAt(pc+1);
+  var l = byteAt(pc & 0xffff);
+  var h = byteAt((pc+1) & 0xffff);
   this.pc = (pc + 2) & 0xFFFF;
   return h << 8 | l;
 };
@@ -234,14 +234,14 @@ Cpu.prototype.nextWord = function() {
 Cpu.prototype.writeByte = function(addr, value) {
 
   var v = value & 0xFF;
-  byteTo(addr, v);
+  byteTo(addr & 0xffff, v);
 };
 
 Cpu.prototype.writeWord = function(addr, value) {
   var l = value;
   var h = value >> 8;
-  this.writeByte(addr, l);
-  this.writeByte(addr+1, h);
+  this.writeByte(addr & 0xffff, l);
+  this.writeByte((addr+1) & 0xffff, h);
 };
 
 
