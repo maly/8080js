@@ -117,6 +117,7 @@ var Cpu = function ()
   this.a = 0;
   this.pc = 0;
   this.inte = 0;
+  this.halted = 0;
   this.sp = 0xF000;
   this.cycles = 0;
   this.ram=[];
@@ -188,6 +189,10 @@ Cpu.prototype.toString = function() {
 
 // Step through one instruction
 Cpu.prototype.step = function() {
+  if (this.halted===1) {
+    this.cycles++;
+    return 1;
+  }
   var i = byteAt(this.pc++);
   var inT = this.cycles;
   this.execute(i);
@@ -1214,8 +1219,8 @@ Cpu.prototype.execute = function(i) {
   case 0x76:
     {
       // HALT
-      // Ignore for now...
       this.cycles += 7;
+      this.halted = 1;
     }
     break;
   case 0x77:
@@ -2323,6 +2328,7 @@ var reset = function(){
   //pc=wordAt(ResetTo);
   proc.pc=0;
   proc.sp=0;
+  proc.halted = 0;
   proc.a=proc.b=proc.c=proc.d=proc.e=proc.h=proc.l=0;
   proc.f=2;
   proc.inte = 0;
@@ -2374,6 +2380,7 @@ exports["status"] = function() {
   };
 exports['interrupt'] = function(vector) {
       if (proc.inte) {
+        proc.halted = 0;
         proc.push(proc.pc);
         proc.pc = vector || 0x38;
       }
