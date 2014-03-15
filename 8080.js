@@ -99,7 +99,7 @@ function pad(str, n) {
 var CARRY     = 0x01;
 var PARITY    = 0x04;
 var HALFCARRY = 0x10;
-var INTERRUPT = 0x20;
+var INTERRUPT = 0;
 var ZERO      = 0x40;
 var SIGN      = 0x80;
 
@@ -116,6 +116,7 @@ var Cpu = function ()
   this.l = 0;
   this.a = 0;
   this.pc = 0;
+  this.inte = 0;
   this.sp = 0xF000;
   this.cycles = 0;
   this.ram=[];
@@ -1839,7 +1840,7 @@ Cpu.prototype.execute = function(i) {
     {
       //  CALL Z,nn
       if (this.f & ZERO) {
-	this.cycles += 18;
+	this.cycles += 17;
 	w = this.nextWord();
 	this.push(this.pc);
 	this.pc = w;
@@ -1900,13 +1901,12 @@ Cpu.prototype.execute = function(i) {
     {
       // JP   NC,nn
       if (this.f & CARRY) {
-	this.cycles += 10;
 	this.pc = (this.pc + 2) & 0xFFFF;
       }
       else {
-	this.cycles += 15;
 	this.pc = this.nextWord();
       }
+    this.cycles += 10;
     }
     break;
   case 0xD3:
@@ -1924,7 +1924,7 @@ Cpu.prototype.execute = function(i) {
 	this.pc = (this.pc + 2) & 0xFFFF;
       }
       else {
-	this.cycles += 18;
+	this.cycles += 17;
 	w = this.nextWord();
 	this.push(this.pc);
 	this.pc = w;
@@ -1969,13 +1969,12 @@ Cpu.prototype.execute = function(i) {
     {
       // JP   C,nn
       if (this.f & CARRY) {
-	this.cycles += 15;
 	this.pc = this.nextWord();
       }
       else {
-	this.cycles += 10;
 	this.pc = (this.pc + 2) & 0xFFFF;
       }
+    this.cycles += 10;
     }
     break;
   case 0xDB:
@@ -1989,7 +1988,7 @@ Cpu.prototype.execute = function(i) {
     {
       //  CALL C,nn
       if (this.f & CARRY) {
-	this.cycles += 18;
+	this.cycles += 17;
 	w = this.nextWord();
 	this.push(this.pc);
 	this.pc = w;
@@ -2038,13 +2037,12 @@ Cpu.prototype.execute = function(i) {
     {
       // JP   PO,nn
       if (this.f & PARITY) {
-	this.cycles += 10;
 	this.pc = (this.pc + 2) & 0xFFFF;
       }
       else {
-	this.cycles += 15;
 	this.pc = this.nextWord();
       }
+    this.cycles += 10;
     }
     break;
   case 0xE3:
@@ -2064,7 +2062,7 @@ Cpu.prototype.execute = function(i) {
 	this.pc = (this.pc + 2) & 0xFFFF;
       }
       else {
-	this.cycles += 18;
+	this.cycles += 17;
 	w = this.nextWord();
 	this.push(this.pc);
 	this.pc = w;
@@ -2116,13 +2114,12 @@ Cpu.prototype.execute = function(i) {
     {
       // JP   PE,nn
       if (this.f & PARITY) {
-	this.cycles += 15;
 	this.pc = this.nextWord();
       }
       else {
-	this.cycles += 10;
 	this.pc = (this.pc + 2) & 0xFFFF;
       }
+    this.cycles += 10;
     }
     break;
   case 0xEB:
@@ -2138,7 +2135,7 @@ Cpu.prototype.execute = function(i) {
     {
       //  CALL PE,nn
       if (this.f & PARITY) {
-	this.cycles += 18;
+	this.cycles += 17;
 	w = this.nextWord();
 	this.push(this.pc);
 	this.pc = w;
@@ -2187,19 +2184,18 @@ Cpu.prototype.execute = function(i) {
     {
       // JP   P,nn
       if (this.f & SIGN) {
-	this.cycles += 10;
 	this.pc = (this.pc + 2) & 0xFFFF;
       }
       else {
-	this.cycles += 15;
 	this.pc = this.nextWord();
       }
+    this.cycles += 10;
     }
     break;
   case 0xF3:
     {
       // DI
-      this.f &= ~INTERRUPT & 0xFF;
+      this.inte = 0;
       this.cycles += 4;
     }
     break;
@@ -2211,7 +2207,7 @@ Cpu.prototype.execute = function(i) {
 	this.pc = (this.pc + 2) & 0xFFFF;
       }
       else {
-	this.cycles += 18;
+	this.cycles += 17;
 	w = this.nextWord();
 	this.push(this.pc);
 	this.pc = w;
@@ -2263,19 +2259,18 @@ Cpu.prototype.execute = function(i) {
     {
       // JP   M,nn
       if (this.f & SIGN) {
-	this.cycles += 15;
 	this.pc = this.nextWord();
       }
       else {
-	this.cycles += 10;
 	this.pc = (this.pc + 2) & 0xFFFF;
       }
+    this.cycles += 10;
     }
     break;
   case 0xFB:
     {
       // EI
-      this.f |= INTERRUPT;
+      this.inte = 1;
       this.cycles += 4;
     }
     break;
@@ -2330,6 +2325,7 @@ var reset = function(){
   proc.sp=0;
   proc.a=proc.b=proc.c=proc.d=proc.e=proc.h=proc.l=0;
   proc.f=2;
+  proc.inte = 0;
   proc.cycles=0;
 };
 
@@ -2377,11 +2373,10 @@ exports["status"] = function() {
     };
   };
 exports['interrupt'] = function(vector) {
-      if (proc.f & INTERRUPT) {
+      if (proc.inte) {
         proc.push(proc.pc);
         proc.pc = vector || 0x38;
       }
-
   };
 exports["set"] = function(reg,value) {
   reg = reg.toUpperCase();
