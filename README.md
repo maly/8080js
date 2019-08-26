@@ -52,3 +52,8 @@ Roadmap
 
 - Change it from self-called constructor to real class
 - Prepare exerciser as inline test
+
+Support
+-------
+
+[![Become a Patron!](https://github.com/omenmicro/omenmicro.eu/blob/master/img/become-a-patron-button.png?raw=true)](https://www.patreon.com/bePatron?u=23689010)
