@@ -1,0 +1,10 @@
+{
+  "name": "8080js",
+  "private": true,
+  "description": "Precise JS emulator for Intel 8080 CPU",
+  "main": "8080.js",
+  "scripts": {
+    "test": "node --test test/node/*.test.js"
+  },
+  "license": "MIT"
+}

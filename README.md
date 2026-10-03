@@ -45,6 +45,8 @@ Tests
 
 8080js is slightly tested with qUnit - just a basic functionality at this moment
 
+Run the tests in Node.js (no dependencies, Node 20+) with `npm test`; the same basic tests are in `test/node/`. The browser version (qUnit + JSHint) is `test/index.html`.
+
 Use emu8080test.html for testing with a real test suite
 
 Roadmap
