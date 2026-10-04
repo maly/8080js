@@ -2325,11 +2325,11 @@ Cpu.prototype.execute = function(i) {
 var proc, tracer=false;
 
 var reset = function(){
+  // Intel 8080 RESET: PC=0, flags initialized, interrupts disabled.
+  // General-purpose registers A,B,C,D,E,H,L and SP are preserved.
   //pc=wordAt(ResetTo);
   proc.pc=0;
-  proc.sp=0;
   proc.halted = 0;
-  proc.a=proc.b=proc.c=proc.d=proc.e=proc.h=proc.l=0;
   proc.f=2;
   proc.inte = 0;
   proc.cycles=0;
