@@ -27,6 +27,47 @@ test( "Reset", function() {
 	equal( CPU8080.T(), 0, "Reset T counter OK" );
 });
 
+test( "Reset preserves A,B,C,D,E,H,L and SP; clears PC, flags, IE", function() {
+	CPU8080.init(function(){}, function(){ return 0xfb; });
+	CPU8080.set("A",0x11);
+	CPU8080.set("B",0x22);
+	CPU8080.set("C",0x33);
+	CPU8080.set("D",0x44);
+	CPU8080.set("E",0x55);
+	CPU8080.set("H",0x66);
+	CPU8080.set("L",0x77);
+	CPU8080.set("SP",0xabcd);
+	CPU8080.set("F",0xd5);
+	CPU8080.set("PC",0);
+	CPU8080.steps(1);
+	CPU8080.interrupt(0x38);
+	equal( CPU8080.status().pc, 0x38, "IE enabled before reset" );
+	CPU8080.set("PC",0x1234);
+	CPU8080.set("A",0x11);
+	CPU8080.set("B",0x22);
+	CPU8080.set("C",0x33);
+	CPU8080.set("D",0x44);
+	CPU8080.set("E",0x55);
+	CPU8080.set("H",0x66);
+	CPU8080.set("L",0x77);
+	CPU8080.set("SP",0xabcd);
+	CPU8080.set("F",0xd5);
+	CPU8080.reset();
+	equal( CPU8080.status().pc, 0, "PC cleared" );
+	equal( CPU8080.status().f, 2, "Flags reset to 0x02" );
+	equal( CPU8080.T(), 0, "T counter cleared" );
+	equal( CPU8080.status().a, 0x11, "A preserved" );
+	equal( CPU8080.status().b, 0x22, "B preserved" );
+	equal( CPU8080.status().c, 0x33, "C preserved" );
+	equal( CPU8080.status().d, 0x44, "D preserved" );
+	equal( CPU8080.status().e, 0x55, "E preserved" );
+	equal( CPU8080.status().h, 0x66, "H preserved" );
+	equal( CPU8080.status().l, 0x77, "L preserved" );
+	equal( CPU8080.status().sp, 0xabcd, "SP preserved" );
+	CPU8080.interrupt(0x38);
+	equal( CPU8080.status().pc, 0, "IE disabled after reset" );
+});
+
 test( "Register manipulations", function() {
 	CPU8080.set("A",0x55);
 	CPU8080.set("B",0xAA);
