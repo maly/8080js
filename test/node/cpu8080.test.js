@@ -32,6 +32,54 @@ describe('Simple data tests', () => {
     assert.strictEqual(CPU8080.T(), 0, 'Reset T counter OK');
   });
 
+  // Issue #1: RESET must not clear general-purpose registers (Intel 8080).
+  test('Reset preserves A,B,C,D,E,H,L and SP; clears PC, flags, IE', () => {
+    CPU8080.init(() => {}, () => 0xfb); // EI at every address
+    CPU8080.set('A', 0x11);
+    CPU8080.set('B', 0x22);
+    CPU8080.set('C', 0x33);
+    CPU8080.set('D', 0x44);
+    CPU8080.set('E', 0x55);
+    CPU8080.set('H', 0x66);
+    CPU8080.set('L', 0x77);
+    CPU8080.set('SP', 0xabcd);
+    CPU8080.set('F', 0xd5); // SZ... with bit1 clear — reset forces f=2
+    CPU8080.set('PC', 0);
+    CPU8080.steps(1); // EI -> inte=1
+    // Prove interrupts were enabled before reset
+    CPU8080.interrupt(0x38);
+    assert.strictEqual(CPU8080.status().pc, 0x38, 'IE enabled before reset');
+    CPU8080.set('PC', 0x1234);
+    CPU8080.set('A', 0x11); // restore A in case interrupt path touched stack only
+    CPU8080.set('B', 0x22);
+    CPU8080.set('C', 0x33);
+    CPU8080.set('D', 0x44);
+    CPU8080.set('E', 0x55);
+    CPU8080.set('H', 0x66);
+    CPU8080.set('L', 0x77);
+    CPU8080.set('SP', 0xabcd);
+    CPU8080.set('F', 0xd5);
+
+    CPU8080.reset();
+
+    const s = CPU8080.status();
+    assert.strictEqual(s.pc, 0, 'PC cleared');
+    assert.strictEqual(s.f, 2, 'Flags reset to 0x02');
+    assert.strictEqual(CPU8080.T(), 0, 'T counter cleared');
+    assert.strictEqual(s.a, 0x11, 'A preserved');
+    assert.strictEqual(s.b, 0x22, 'B preserved');
+    assert.strictEqual(s.c, 0x33, 'C preserved');
+    assert.strictEqual(s.d, 0x44, 'D preserved');
+    assert.strictEqual(s.e, 0x55, 'E preserved');
+    assert.strictEqual(s.h, 0x66, 'H preserved');
+    assert.strictEqual(s.l, 0x77, 'L preserved');
+    assert.strictEqual(s.sp, 0xabcd, 'SP preserved');
+
+    // Interrupt enable cleared: pending IRQ must not redirect PC
+    CPU8080.interrupt(0x38);
+    assert.strictEqual(CPU8080.status().pc, 0, 'IE disabled after reset');
+  });
+
   test('Register manipulations', () => {
     CPU8080.set('A', 0x55);
     CPU8080.set('B', 0xaa);
