@@ -43,17 +43,14 @@ You can use 8080js also as Node.js module.
 Tests
 -----
 
-8080js is slightly tested with qUnit - just a basic functionality at this moment
+Run the tests in Node.js (no dependencies, Node 20+) with `npm test`. It runs the basic tests (`test/node/cpu8080.test.js`) and the full CPU diagnostic – MICROCOSM ASSOCIATES 8080/8085 CPU DIAGNOSTIC VERSION 1.0 (`test/node/cpudiag.test.js`, program in `test/fixtures/cpudiag.hex`). The diagnostic test fails when the program reaches its error exit (0x06A5) or does not finish within 1,000,000 steps.
 
-Run the tests in Node.js (no dependencies, Node 20+) with `npm test`; the same basic tests are in `test/node/`. The browser version (qUnit + JSHint) is `test/index.html`.
-
-Use emu8080test.html for testing with a real test suite
+The browser version of the basic tests (qUnit + JSHint) is `test/index.html`. `test/emu8080test.html` runs the same CPU diagnostic manually in a browser (its inline hex must be kept identical to `test/fixtures/cpudiag.hex`).
 
 Roadmap
 -------
 
 - Change it from self-called constructor to real class
-- Prepare exerciser as inline test
 
 Support
 -------
