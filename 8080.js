@@ -117,6 +117,7 @@ var Cpu = function ()
   this.a = 0;
   this.pc = 0;
   this.inte = 0;
+  this.eiPending = 0;
   this.halted = 0;
   this.sp = 0xF000;
   this.cycles = 0;
@@ -193,11 +194,18 @@ Cpu.prototype.step = function() {
     this.cycles++;
     return 1;
   }
+  // EI takes effect only after the instruction that follows it.
+  // Interrupts are only accepted between step() calls, so enabling INTE
+  // before that instruction executes is equivalent, and it lets a DI
+  // right after EI cancel the pending enable.
+  if (this.eiPending) {
+    this.eiPending = 0;
+    this.inte = 1;
+  }
   var i = byteAt(this.pc++);
   var inT = this.cycles;
   this.execute(i);
   this.pc &= 0xFFFF;
-  //this.processInterrupts();
   return this.cycles-inT;
 };
 
@@ -2199,8 +2207,9 @@ Cpu.prototype.execute = function(i) {
     break;
   case 0xF3:
     {
-      // DI
+      // DI (also cancels a pending EI)
       this.inte = 0;
+      this.eiPending = 0;
       this.cycles += 4;
     }
     break;
@@ -2274,8 +2283,8 @@ Cpu.prototype.execute = function(i) {
     break;
   case 0xFB:
     {
-      // EI
-      this.inte = 1;
+      // EI - interrupts are enabled after the next instruction (see step())
+      this.eiPending = 1;
       this.cycles += 4;
     }
     break;
@@ -2332,6 +2341,7 @@ var reset = function(){
   proc.halted = 0;
   proc.f=2;
   proc.inte = 0;
+  proc.eiPending = 0;
   proc.cycles=0;
 };
 
@@ -2342,7 +2352,6 @@ var goTrace = function(proc){
 
 exports["trace"] = function(stat) {tracer = stat;};
 exports["steps"] = function(Ts){
-    T=0;
 
 
     while (Ts>0){
@@ -2379,10 +2388,15 @@ exports["status"] = function() {
     };
   };
 exports['interrupt'] = function(vector) {
+      // Accepting an interrupt behaves like the 8080 INTA cycle with RST n:
+      // INTE is cleared, PC is pushed, execution continues at the vector, 11 T-states.
       if (proc.inte) {
+        proc.inte = 0;
+        proc.eiPending = 0;
         proc.halted = 0;
         proc.push(proc.pc);
-        proc.pc = vector || 0x38;
+        proc.pc = (vector === undefined ? 0x38 : vector) & 0xFFFF;
+        proc.cycles += 11;
       }
   };
 exports["set"] = function(reg,value) {

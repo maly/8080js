@@ -40,6 +40,7 @@ test( "Reset preserves A,B,C,D,E,H,L and SP; clears PC, flags, IE", function() {
 	CPU8080.set("F",0xd5);
 	CPU8080.set("PC",0);
 	CPU8080.steps(1);
+	CPU8080.steps(1);
 	CPU8080.interrupt(0x38);
 	equal( CPU8080.status().pc, 0x38, "IE enabled before reset" );
 	CPU8080.set("PC",0x1234);

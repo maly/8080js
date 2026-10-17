@@ -32,6 +32,7 @@ Usage
 - *CPU8080.set(register, value)* - sets internal register (named PC, A, B, C, D, E, H, L, F, SP) to a given value 
 - *CPU8080.status()* - Returns a object {pc, a, b, c, d, e, h, l, f, sp} with actual state of internal registers
 - *CPU8080.steps(N)* - Execute instructions as real CPU, which takes "no less than N" clock ticks.
+- *CPU8080.interrupt(vector)* - Requests an interrupt. It is accepted only when interrupts are enabled (`EI` enables them after the instruction that follows it, `DI` disables them and cancels a pending `EI`). Accepting it works like the 8080 INTA cycle with an `RST` instruction: interrupts are disabled (the handler must execute `EI` again), a halted CPU is woken, PC is pushed, execution continues at `vector` (default 0x38, `interrupt(0)` jumps to 0x0000) and it takes 11 T-states. A request while interrupts are disabled is ignored.
 
 Disassembler:
 
