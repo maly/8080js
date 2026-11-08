@@ -41,6 +41,8 @@ Disassembler:
 
 You can use 8080js also as Node.js module.
 
+`8080.min.js` is a build artifact of `8080.js`. Browsers can load either file; Node and the tests load `8080.js` (`test/node/minified.test.js` checks the interrupt behaviour of `8080.min.js`). After changing `8080.js`, regenerate the minified file with `npm run minify` (terser via `npx`); CI fails when `8080.min.js` is out of sync.
+
 Tests
 -----
 
