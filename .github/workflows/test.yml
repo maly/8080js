@@ -20,3 +20,5 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: node --version
       - run: npm test
+      - name: Check 8080.min.js is in sync with 8080.js
+        run: npm run minify && git diff --exit-code -- 8080.min.js

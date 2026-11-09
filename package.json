@@ -4,7 +4,8 @@
   "description": "Precise JS emulator for Intel 8080 CPU",
   "main": "8080.js",
   "scripts": {
-    "test": "node --test test/node/*.test.js"
+    "test": "node --test test/node/*.test.js",
+    "minify": "npx --yes terser@5.51.2 8080.js -c -m -o 8080.min.js"
   },
   "license": "MIT"
 }
